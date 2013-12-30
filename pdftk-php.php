@@ -50,7 +50,7 @@
 #
 #############################################################################
 	
-		public function make_pdf($fdf_data_strings, $fdf_data_names, $fields_hidden, $fields_readonly, $pdf_original, $pdf_filename) {
+		public function make_pdf($fdf_data_strings, $fdf_data_names, $fields_hidden, $fields_readonly, $pdf_original, $pdf_filename, $save_to_file = FALSE) {
 			// Create the fdf file
 			$fdf = $this->forge_fdf('', $fdf_data_strings, $fdf_data_names, $fields_hidden, $fields_readonly);
 			
@@ -66,9 +66,16 @@
 				header("Content-Type: application/force-download");
 				header("Content-Disposition: attachment; filename=\"$pdf_filename\"");
 				
-				// Actually make the PDF by running pdftk - make sure the path to pdftk is correct
-				// The PDF will be output directly to the browser - apart from the original PDF file, no actual PDF wil be saved on the server.
-				passthru("/usr/local/bin/pdftk $pdf_original fill_form $fdf_fn output - flatten");
+				if ($save_to_file)
+				{
+					exec("/usr/local/bin/pdftk $pdf_original fill_form $fdf_fn output $pdf_filename);
+				}
+				else
+				{
+					// Actually make the PDF by running pdftk - make sure the path to pdftk is correct
+					// The PDF will be output directly to the browser - apart from the original PDF file, no actual PDF wil be saved on the server.
+					passthru("/usr/local/bin/pdftk $pdf_original fill_form $fdf_fn output - flatten");
+				}
 				
 				// delete temporary fdf file
 				unlink( $fdf_fn ); 
